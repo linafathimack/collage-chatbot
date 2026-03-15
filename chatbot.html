@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KMCT College Help Desk</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; }
+
+    .chat-scroll::-webkit-scrollbar { width: 5px; }
+    .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+    .chat-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-animate { animation: slideUp 0.3s ease-out forwards; }
+
+    @keyframes pulse-dot {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .typing-dot { animation: pulse-dot 1.4s infinite ease-in-out; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    .quick-btn {
+      transition: all 0.2s ease;
+    }
+    .quick-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app-wrapper" class="h-full w-full flex flex-col overflow-hidden" style="background: #0f172a;"><!-- Header -->
+   <header class="flex-shrink-0 px-4 py-3 flex items-center gap-3 border-b" style="background: #1e293b; border-color: #334155;">
+    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #f59e0b, #ef4444); animation: gradientShift 4s ease infinite; background-size: 200% 200%;">
+     <svg width="22" height="22" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+     </svg>
+    </div>
+    <div class="flex-1 min-w-0">
+     <h1 id="header-title" class="text-sm font-bold truncate" style="color: #f8fafc; font-family: 'Playfair Display', serif;">KMCT Assistant</h1>
+     <p id="header-college" class="text-xs truncate" style="color: #94a3b8;">KMCT College of Engineering</p>
+    </div>
+    <div class="flex items-center gap-1.5 flex-shrink-0"><span class="w-2 h-2 rounded-full" style="background: #22c55e;"></span> <span class="text-xs" style="color: #22c55e;">Online</span>
+    </div>
+   </header><!-- Chat Area -->
+   <main id="chat-area" class="flex-1 overflow-y-auto chat-scroll px-4 py-4 space-y-3" role="log" aria-label="Chat messages" style="background: #0f172a;">
+   </main><!-- Quick Actions -->
+   <div id="quick-actions" class="flex-shrink-0 px-4 pb-2 pt-1" style="background: #0f172a;">
+    <div class="flex gap-2 overflow-x-auto pb-1" style="-webkit-overflow-scrolling: touch;"><button class="quick-btn flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border" style="color: #f59e0b; border-color: #f59e0b33; background: #f59e0b15;" onclick="sendQuickMessage('Admission Process')">🎓 Admissions</button> <button class="quick-btn flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border" style="color: #38bdf8; border-color: #38bdf833; background: #38bdf815;" onclick="sendQuickMessage('Courses Offered')">📚 Courses</button> <button class="quick-btn flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border" style="color: #a78bfa; border-color: #a78bfa33; background: #a78bfa15;" onclick="sendQuickMessage('Fee Structure')">💰 Fees</button> <button class="quick-btn flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border" style="color: #34d399; border-color: #34d39933; background: #34d39915;" onclick="sendQuickMessage('Hostel Facilities')">🏠 Hostel</button> <button class="quick-btn flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border" style="color: #fb7185; border-color: #fb718533; background: #fb718515;" onclick="sendQuickMessage('Placements')">💼 Placements</button> <button class="quick-btn flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border" style="color: #fbbf24; border-color: #fbbf2433; background: #fbbf2415;" onclick="sendQuickMessage('Contact Information')">📞 Contact</button>
+    </div>
+   </div><!-- Input Area -->
+   <footer class="flex-shrink-0 px-4 pb-4 pt-2" style="background: #0f172a;">
+    <form id="chat-form" class="flex items-center gap-2 p-1.5 rounded-2xl border" style="background: #1e293b; border-color: #334155;"><label for="chat-input" class="sr-only">Type your question</label> <input id="chat-input" type="text" placeholder="Ask me anything about KMCT..." class="flex-1 bg-transparent px-3 py-2.5 text-sm outline-none min-w-0" style="color: #f8fafc;" autocomplete="off"> <button type="submit" id="send-btn" class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200" style="background: linear-gradient(135deg, #f59e0b, #ef4444);" aria-label="Send message"> <i data-lucide="send" style="width: 18px; height: 18px; color: white;"></i> </button>
+    </form>
+   </footer>
+  </div>
+  <script>
+    // Knowledge base for KMCT College of Engineering
+    const knowledgeBase = {
+      admission: {
+        keywords: ['admission', 'admit', 'apply', 'application', 'entrance', 'eligibility', 'join', 'enroll', 'enrollment', 'registration', 'register', 'keam', 'seat'],
+        response: `**Admission Process at KMCT College of Engineering:**\n\n🔹 **Eligibility:** 10+2 with Physics, Mathematics & Chemistry/CS/Biology with minimum 45% marks (40% for reserved categories)\n\n🔹 **Entrance Exam:** Admissions through KEAM (Kerala Engineering Architecture Medical) conducted by CEE Kerala\n\n🔹 **Management Quota:** Limited seats available under management quota. Contact the admission office directly.\n\n🔹 **Documents Required:**\n• SSLC & Plus Two mark sheets\n• Transfer Certificate\n• KEAM Score Card\n• Community/Caste Certificate\n• Passport-size photographs\n\n🔹 **Application Period:** Usually June–August every year\n\n📞 Contact Admission Office: +91 496 2690 600`
+      },
+      courses: {
+        keywords: ['course', 'branch', 'department', 'program', 'stream', 'btech', 'b.tech', 'mtech', 'm.tech', 'engineering', 'offered', 'specialization', 'degree'],
+        response: `**Courses Offered at KMCT College of Engineering:**\n\n🎓 **B.Tech Programs (4 Years):**\n• Computer Science & Engineering (CSE)\n• Electronics & Communication Engineering (ECE)\n• Electrical & Electronics Engineering (EEE)\n• Mechanical Engineering (ME)\n• Civil Engineering (CE)\n• Information Technology (IT)\n\n🎓 **M.Tech Programs (2 Years):**\n• Computer Science & Engineering\n• VLSI & Embedded Systems\n• Structural Engineering\n\n📌 All programs are approved by AICTE and affiliated to APJ Abdul Kalam Technological University (KTU).`
+      },
+      fees: {
+        keywords: ['fee', 'fees', 'cost', 'tuition', 'payment', 'scholarship', 'expense', 'charges', 'price', 'amount', 'concession'],
+        response: `**Fee Structure (Approximate):**\n\n💰 **B.Tech Programs:**\n• Merit Seats: ₹35,000 – ₹45,000/year (Govt. fixed)\n• Management Seats: ₹75,000 – ₹1,00,000/year\n\n💰 **M.Tech Programs:**\n• ₹50,000 – ₹75,000/year\n\n🎯 **Scholarships Available:**\n• E-Grantz (Kerala Govt.)\n• Central Sector Scholarship\n• KMCT Trust Merit Scholarships\n• SC/ST/OBC Fee Concessions\n\n📌 *Fees may vary. Contact the accounts section for exact current figures.*\n\n📞 Fee Enquiry: +91 496 2690 600`
+      },
+      hostel: {
+        keywords: ['hostel', 'accommodation', 'room', 'stay', 'residential', 'mess', 'food', 'living', 'dormitory', 'lodge'],
+        response: `**Hostel & Accommodation:**\n\n🏠 **Facilities Available:**\n• Separate hostels for boys and girls\n• Well-furnished rooms (2/3 sharing)\n• 24/7 Wi-Fi connectivity\n• Mess with vegetarian & non-vegetarian options\n• RO purified drinking water\n• Recreation & reading rooms\n• 24-hour security with CCTV\n\n💰 **Hostel Fees (Approximate):**\n• ₹40,000 – ₹60,000/year (including mess)\n\n📌 Hostel admission is on first-come, first-served basis. Apply early!\n\n📞 Hostel Warden Office: +91 496 2690 600`
+      },
+      placement: {
+        keywords: ['placement', 'job', 'recruit', 'company', 'career', 'salary', 'package', 'hire', 'employ', 'campus', 'interview', 'offer'],
+        response: `**Training & Placement Cell:**\n\n💼 **Highlights:**\n• Dedicated placement cell with industry connections\n• Regular aptitude & soft skills training\n• Mock interviews and group discussions\n\n🏢 **Top Recruiters:**\n• TCS, Infosys, Wipro, UST Global\n• Muthoot Group, Federal Bank\n• KELTRON, BSNL, and more\n\n📊 **Placement Stats:**\n• Average package: ₹3.5 – ₹5 LPA\n• Highest package: ₹8+ LPA\n• 70%+ placement record\n\n🎯 **Internship Support:** The college facilitates summer internships with leading companies.\n\n📞 Placement Officer: +91 496 2690 600`
+      },
+      contact: {
+        keywords: ['contact', 'phone', 'email', 'address', 'location', 'reach', 'where', 'map', 'direction', 'call', 'number', 'office'],
+        response: `**Contact Information:**\n\n📍 **Address:**\nKMCT College of Engineering\nManassery P.O., Mukkam\nKozhikode, Kerala – 673602\n\n📞 **Phone:** +91 496 2690 600\n📧 **Email:** info@kmctce.in\n🌐 **Website:** www.kmctce.in\n\n🕐 **Office Hours:**\nMonday – Saturday: 9:00 AM – 5:00 PM\n\n🚗 **How to Reach:**\n• 25 km from Kozhikode Railway Station\n• 45 km from Calicut International Airport\n• Regular bus services from Kozhikode city`
+      },
+      facilities: {
+        keywords: ['facility', 'facilities', 'lab', 'library', 'sports', 'wifi', 'canteen', 'infrastructure', 'campus', 'ground', 'gym', 'auditorium'],
+        response: `**Campus Facilities:**\n\n🏫 **Academic:**\n• State-of-the-art laboratories\n• Central library with 25,000+ books & digital resources\n• Smart classrooms with projectors\n• High-speed Wi-Fi campus\n\n⚽ **Sports & Recreation:**\n• Football & cricket grounds\n• Basketball & volleyball courts\n• Indoor games facility\n• Annual sports meet\n\n🍽️ **Other Amenities:**\n• Spacious canteen with affordable meals\n• Seminar halls & auditorium\n• Medical facility on campus\n• Student counseling center\n• Transportation from major cities`
+      },
+      exam: {
+        keywords: ['exam', 'examination', 'result', 'grade', 'semester', 'internal', 'external', 'ktu', 'mark', 'backlog', 'supply', 'revaluation'],
+        response: `**Examination Details:**\n\n📝 **University:** APJ Abdul Kalam Technological University (KTU)\n\n📊 **Evaluation Pattern:**\n• Internal Assessment: 50 marks (assignments, attendance, internal exams)\n• University Exam: 100 marks (end-semester)\n• Minimum 45% aggregate to pass\n\n📅 **Exam Schedule:**\n• Odd Semesters: Nov–Dec\n• Even Semesters: Apr–May\n\n🔗 **Results:** Check at ktu.edu.in\n\n📌 For exam-related queries, contact the Examination Cell at the main office.`
+      },
+      club: {
+        keywords: ['club', 'event', 'fest', 'cultural', 'technical', 'nss', 'ncc', 'ieee', 'activity', 'extracurricular', 'workshop', 'seminar', 'hackathon'],
+        response: `**Clubs & Activities:**\n\n🎭 **Student Clubs:**\n• IEEE Student Branch\n• IEDC (Innovation & Entrepreneurship Development Cell)\n• NSS Unit\n• Arts & Literary Club\n• Coding Club & Robotics Club\n\n🎉 **Major Events:**\n• Annual Tech Fest\n• Cultural Festival\n• Hackathons & Coding Competitions\n• Industry Workshops & Guest Lectures\n\n📌 Students are encouraged to join at least one club for overall development!`
+      },
+      greeting: {
+        keywords: ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings', 'sup', 'hola', 'namaste'],
+        response: `Hello! 👋 Welcome to the **KMCT College of Engineering Help Desk**!\n\nI'm here to help you with information about:\n🎓 Admissions & Courses\n💰 Fee Structure & Scholarships\n🏠 Hostel & Facilities\n💼 Placements & Career\n📞 Contact Details\n\nFeel free to ask me anything or tap the quick buttons below!`
+      },
+      thanks: {
+        keywords: ['thank', 'thanks', 'thank you', 'thx', 'appreciate', 'helpful', 'great', 'awesome', 'nice'],
+        response: `You're welcome! 😊 I'm glad I could help!\n\nIf you have any more questions about KMCT College of Engineering, feel free to ask anytime.\n\n🎓 Wishing you all the best!`
+      }
+    };
+
+    // State
+    let chatMessages = [];
+    let isTyping = false;
+
+    const defaultConfig = {
+      bot_name: 'KMCT Assistant',
+      welcome_message: "Hello! 👋 I'm the KMCT College of Engineering Help Desk Bot. How can I assist you today?",
+      college_name: 'KMCT College of Engineering',
+      background_color: '#0f172a',
+      surface_color: '#1e293b',
+      text_color: '#f8fafc',
+      primary_action_color: '#f59e0b',
+      secondary_action_color: '#94a3b8',
+      font_family: 'DM Sans',
+      font_size: 14
+    };
+
+    function getConfig() {
+      return window.elementSdk?.config || defaultConfig;
+    }
+
+    // Format markdown-like text to HTML
+    function formatMessage(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+    }
+
+    // Find best matching response
+    function getResponse(userInput) {
+      const input = userInput.toLowerCase().trim();
+      let bestMatch = null;
+      let bestScore = 0;
+
+      for (const [category, data] of Object.entries(knowledgeBase)) {
+        let score = 0;
+        for (const keyword of data.keywords) {
+          if (input.includes(keyword)) {
+            score += keyword.length;
+          }
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = data.response;
+        }
+      }
+
+      if (bestMatch) return bestMatch;
+
+      return `I appreciate your question! 🤔\n\nI don't have specific information about that topic right now. Here's what I can help you with:\n\n🎓 **Admissions** — Process, eligibility, documents\n📚 **Courses** — B.Tech & M.Tech programs\n💰 **Fees** — Fee structure & scholarships\n🏠 **Hostel** — Accommodation & facilities\n💼 **Placements** — Companies, packages, training\n📞 **Contact** — Address, phone, email\n🏫 **Facilities** — Labs, library, sports\n📝 **Exams** — KTU pattern, schedule\n🎭 **Clubs** — Student activities & events\n\nTry asking about one of these topics, or contact the college directly at **+91 496 2690 600**.`;
+    }
+
+    // Render chat messages
+    function renderChat() {
+      const chatArea = document.getElementById('chat-area');
+      const config = getConfig();
+
+      // Build messages HTML
+      const fragments = [];
+      chatMessages.forEach((msg, i) => {
+        if (msg.type === 'bot') {
+          fragments.push(`
+            <div class="flex gap-2 items-start msg-animate" data-msg-id="${i}">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style="background: linear-gradient(135deg, ${config.primary_action_color || '#f59e0b'}, #ef4444);">
+                <svg width="14" height="14" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z" transform="scale(0.65)"/></svg>
+              </div>
+              <div class="rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%] text-sm leading-relaxed" style="background: ${config.surface_color || '#1e293b'}; color: ${config.text_color || '#f8fafc'};">
+                ${formatMessage(msg.text)}
+              </div>
+            </div>
+          `);
+        } else {
+          fragments.push(`
+            <div class="flex justify-end msg-animate" data-msg-id="${i}">
+              <div class="rounded-2xl rounded-tr-md px-4 py-3 max-w-[80%] text-sm leading-relaxed" style="background: ${config.primary_action_color || '#f59e0b'}; color: #1a1a2e;">
+                ${formatMessage(msg.text)}
+              </div>
+            </div>
+          `);
+        }
+      });
+
+      // Typing indicator
+      if (isTyping) {
+        fragments.push(`
+          <div class="flex gap-2 items-start msg-animate" id="typing-indicator">
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style="background: linear-gradient(135deg, ${config.primary_action_color || '#f59e0b'}, #ef4444);">
+              <svg width="14" height="14" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z" transform="scale(0.65)"/></svg>
+            </div>
+            <div class="rounded-2xl rounded-tl-md px-4 py-3" style="background: ${config.surface_color || '#1e293b'};">
+              <div class="flex gap-1.5 items-center h-5">
+                <span class="typing-dot w-2 h-2 rounded-full" style="background: ${config.secondary_action_color || '#94a3b8'};"></span>
+                <span class="typing-dot w-2 h-2 rounded-full" style="background: ${config.secondary_action_color || '#94a3b8'};"></span>
+                <span class="typing-dot w-2 h-2 rounded-full" style="background: ${config.secondary_action_color || '#94a3b8'};"></span>
+              </div>
+            </div>
+          </div>
+        `);
+      }
+
+      chatArea.innerHTML = fragments.join('');
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    // Send a message
+    function sendMessage(text) {
+      if (!text.trim() || isTyping) return;
+
+      chatMessages.push({ type: 'user', text: text.trim() });
+      renderChat();
+
+      // Show typing
+      isTyping = true;
+      renderChat();
+
+      const delay = 600 + Math.random() * 800;
+      setTimeout(() => {
+        isTyping = false;
+        const response = getResponse(text);
+        chatMessages.push({ type: 'bot', text: response });
+        renderChat();
+      }, delay);
+    }
+
+    function sendQuickMessage(topic) {
+      document.getElementById('chat-input').value = '';
+      sendMessage(topic);
+    }
+
+    // Form submission
+    document.getElementById('chat-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const text = input.value;
+      input.value = '';
+      sendMessage(text);
+    });
+
+    // Apply config to UI
+    function applyConfig(config) {
+      const wrapper = document.getElementById('app-wrapper');
+      const headerTitle = document.getElementById('header-title');
+      const headerCollege = document.getElementById('header-college');
+      const chatInput = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('send-btn');
+      const chatArea = document.getElementById('chat-area');
+      const quickActions = document.getElementById('quick-actions');
+      const footer = document.querySelector('footer');
+      const header = document.querySelector('header');
+
+      const bg = config.background_color || defaultConfig.background_color;
+      const surface = config.surface_color || defaultConfig.surface_color;
+      const text = config.text_color || defaultConfig.text_color;
+      const primary = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondary = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const font = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+
+      wrapper.style.background = bg;
+      chatArea.style.background = bg;
+      quickActions.style.background = bg;
+      footer.style.background = bg;
+
+      header.style.background = surface;
+      header.style.borderColor = secondary + '33';
+
+      headerTitle.textContent = config.bot_name || defaultConfig.bot_name;
+      headerTitle.style.color = text;
+      headerCollege.textContent = config.college_name || defaultConfig.college_name;
+      headerCollege.style.color = secondary;
+
+      chatInput.style.color = text;
+      chatInput.parentElement.style.background = surface;
+      chatInput.parentElement.style.borderColor = secondary + '33';
+      sendBtn.style.background = `linear-gradient(135deg, ${primary}, #ef4444)`;
+
+      // Font
+      const fontStack = `${font}, 'DM Sans', sans-serif`;
+      wrapper.style.fontFamily = fontStack;
+      headerTitle.style.fontFamily = `'Playfair Display', ${fontStack}`;
+
+      // Font size
+      chatInput.style.fontSize = `${fontSize}px`;
+      headerTitle.style.fontSize = `${fontSize * 1.1}px`;
+      headerCollege.style.fontSize = `${fontSize * 0.85}px`;
+
+      renderChat();
+    }
+
+    // Initialize Element SDK
+    window.elementSdk.init({
+      defaultConfig: defaultConfig,
+      onConfigChange: async (config) => {
+        applyConfig(config);
+      },
+      mapToCapabilities: (config) => ({
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+          },
+          {
+            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+            set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }
+          },
+          {
+            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+        }
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ['bot_name', config.bot_name || defaultConfig.bot_name],
+        ['welcome_message', config.welcome_message || defaultConfig.welcome_message],
+        ['college_name', config.college_name || defaultConfig.college_name]
+      ])
+    });
+
+    // Initial welcome message
+    const initConfig = getConfig();
+    chatMessages.push({
+      type: 'bot',
+      text: initConfig.welcome_message || defaultConfig.welcome_message
+    });
+    renderChat();
+
+    lucide.createIcons();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dcb11626071538b',t:'MTc3MzU3Mjk4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
